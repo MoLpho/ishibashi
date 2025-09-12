@@ -110,11 +110,23 @@ class _ReservationCalendarScreenState extends State<ReservationCalendarScreen> {
             // 日付選択時の処理 選択された日と表示中の月を更新
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
+                
                 _selectedDay = _dateOnly(selectedDay);
-                _focusedDay = focusedDay;
+                _focusedDay  = _dateOnly(focusedDay);
+                
               });
             },
-            onPageChanged: (focused) => _loadMonth(focused), // 月が変わったときにデータを再取得
+            //onPageChanged: (focused) => _loadMonth(focused), 
+
+            // 月が変わったときにデータを再取得
+            onPageChanged: (focused) {
+             final f = _dateOnly(focused);       // 時刻を落として月の基準日を統一
+             if (!isSameDay(f, _focusedDay)) {
+             setState(() => _focusedDay = f);  // ← まず状態を10月に更新
+             _loadMonth(f);                    // ← その月のデータを取得
+             }
+            },
+ 
             calendarFormat: CalendarFormat.month,      // 月表示にフォーマット指定
             availableCalendarFormats: const {CalendarFormat.month: '月'}, 
             headerStyle: const HeaderStyle(formatButtonVisible: false, titleCentered: true),
