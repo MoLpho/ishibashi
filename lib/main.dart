@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'core/theme.dart';
 import 'screens/reservation/calendar/reservation_calendar_screen.dart';
+import 'screens/admin/admin_shell.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,9 @@ class MyApp extends StatelessWidget {
       supportedLocales: const [Locale('ja', 'JP'), Locale('en', 'US')],
       locale: const Locale('ja', 'JP'), // ここで日本語に固定している
       home: const ReservationCalendarScreen(),// ここでホーム画面を予約カレンダー画面に設定
+      routes: {
+        '/admin': (_) => const AdminShell(),
+      },
     );
   }
 }
