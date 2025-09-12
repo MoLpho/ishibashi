@@ -11,6 +11,7 @@ class ConfirmFreeScreen extends StatelessWidget {
   final String name;
   final String phone;
   final String note;
+  final int numPeople; 
 
   const ConfirmFreeScreen({
     super.key,
@@ -20,6 +21,7 @@ class ConfirmFreeScreen extends StatelessWidget {
     required this.name,
     required this.phone,
     required this.note,
+    required this.numPeople,
   });
 
   @override
@@ -36,6 +38,7 @@ class ConfirmFreeScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Text('時間：$start - $end'),
             Text('代表者名：$name'),
+            Text('人数：$numPeople 名'),
             Text('電話番号：$phone'),
             if (note.isNotEmpty) Text('備考：$note'),
             const Spacer(),
@@ -50,6 +53,8 @@ class ConfirmFreeScreen extends StatelessWidget {
                     endTime: end,
                     name: name,
                     phone: phone,
+                    numAdults: numPeople,
+                    numChildren: 0,
                     notes: note.isEmpty ? null : note,
                   );
                   if (context.mounted) {

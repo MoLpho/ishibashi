@@ -30,6 +30,7 @@ class _ReservationFormSheetState extends State<ReservationFormSheet> {
   final _name = TextEditingController(); // 代表者名のテキストコントローラー
   final _phone = TextEditingController(); // 電話番号のテキストコントローラー
   final _note = TextEditingController(); // 備考のテキストコントローラー
+  final _numPeople = TextEditingController(text: '1');
   late Set<String> _selected; // 選択された予約枠ID
 
   // Stateの初期化
@@ -46,6 +47,7 @@ class _ReservationFormSheetState extends State<ReservationFormSheet> {
     _phone.dispose();
     _note.dispose();
     super.dispose();
+    _numPeople.dispose();
   }
 
   @override
@@ -107,6 +109,17 @@ class _ReservationFormSheetState extends State<ReservationFormSheet> {
                 textInputAction: TextInputAction.next, // 次へボタン
                 autofillHints: const [AutofillHints.name], // オートフィルヒント
               ),
+              //人数の入力欄
+              const SizedBox(height: 12),
+              Text('人数'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _numPeople,
+                decoration: const InputDecoration(labelText: '人数 *'),
+                keyboardType: TextInputType.number,
+              validator: (v) => Validators.intInRange(v, min: 1, max: 20),
+              ),
+
               //電話番号の入力欄
               const SizedBox(height: 8),
               TextFormField(
@@ -154,6 +167,7 @@ class _ReservationFormSheetState extends State<ReservationFormSheet> {
                             name: _name.text.trim(),
                             phone: _phone.text.trim(),
                             note: _note.text.trim(),
+                            numPeople: int.parse(_numPeople.text),
                           ),
                         );
                       },

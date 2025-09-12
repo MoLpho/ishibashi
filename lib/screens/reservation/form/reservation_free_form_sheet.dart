@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../utils/validators.dart';
+import 'package:flutter/services.dart';
 
 class ReservationFreeFormSheet extends StatefulWidget {
   final DateTime date;
   final TimeOfDay open;
   final TimeOfDay close;
   final List<({TimeOfDay start, TimeOfDay end})> booked; // その日の既存予約（重複チェック用）
+  
 
   const ReservationFreeFormSheet({
     super.key,
@@ -13,6 +16,7 @@ class ReservationFreeFormSheet extends StatefulWidget {
     required this.open,
     required this.close,
     required this.booked,
+    
   });
 
   @override
@@ -24,6 +28,7 @@ class _ReservationFreeFormSheetState extends State<ReservationFreeFormSheet> {
   final _name = TextEditingController();
   final _phone = TextEditingController();
   final _note = TextEditingController();
+  final _numPeople = TextEditingController(text: '1');
 
   late TimeOfDay _start;
   late TimeOfDay _end;
@@ -40,6 +45,7 @@ class _ReservationFreeFormSheetState extends State<ReservationFreeFormSheet> {
     _name.dispose();
     _phone.dispose();
     _note.dispose();
+    _numPeople.dispose();
     super.dispose();
   }
 
@@ -140,6 +146,16 @@ class _ReservationFreeFormSheetState extends State<ReservationFreeFormSheet> {
                 textInputAction: TextInputAction.next,
                 autofillHints: const [AutofillHints.name],
               ),
+              const SizedBox(height: 12),
+              Text('人数'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _numPeople,
+                decoration: const InputDecoration(labelText: '人数 *'),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (v) => Validators.intInRange(v, min: 1, max: 20),
+              ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _phone,
@@ -180,6 +196,7 @@ class _ReservationFreeFormSheetState extends State<ReservationFreeFormSheet> {
                           'name': _name.text.trim(),
                           'phone': _phone.text.trim(),
                           'note': _note.text.trim(),
+                          'numPeople': int.parse(_numPeople.text),
                         });
                       },
                       child: const Text('確認'),

@@ -329,6 +329,7 @@ class _ReservationCalendarScreenState extends State<ReservationCalendarScreen> {
         name: result['name'] as String,
         phone: result['phone'] as String,
         note: (result['note'] as String?) ?? '',
+        numPeople: result['numPeople'] as int,
       ),
     ));
     if (ok == true && mounted) {

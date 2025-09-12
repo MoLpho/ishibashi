@@ -25,6 +25,7 @@ class ConfirmScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Text("時間枠：${result.slotIds.join(', ')}"),
             Text("代表者名：${result.name}"),
+            Text('人数：${result.numPeople} 名'),
             Text("電話番号：${result.phone}"),
             if (result.note.isNotEmpty) Text("備考：${result.note}"),
             const Spacer(),
@@ -44,6 +45,8 @@ class ConfirmScreen extends StatelessWidget {
                       endTime:   times.end,
                       name: result.name,
                       phone: result.phone,
+                      numAdults: result.numPeople, // 合計人数
+                      numChildren: 0,              // 子どもは使わない
                       notes: result.note.isEmpty ? null : result.note,
                     );
                   }
