@@ -1,6 +1,6 @@
 class Constants {
   /// APIのベースURL,APIを変更したい場合はここを変更する
-  static const String baseUrl = 'http://mattya3340.tplinkdns.com:8000';
+  static const String baseUrl = 'http://127.0.0.1:8000';
 
   /// 予約枠（ID → (開始,終了)）。データベースの予約枠IDと一致させること
   static const Map<String, ({String start, String end})> slotTime = {

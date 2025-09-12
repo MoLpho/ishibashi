@@ -34,7 +34,7 @@ class WeeklyHolidayRule {
         id: (j['id'] as num).toInt(),
         weekday: j['weekday'] as int,
         name: (j['name'] as String?) ?? '定休日',
-        active: (j['is_active'] as bool?) ?? true,
+        active: (j['active'] as bool?) ?? true,
       );
 }
 
@@ -63,7 +63,8 @@ class SettingsApi {
   }
 
   Future<BusinessHoursItem> upsertBusinessHour(BusinessHoursItem item) async {
-    final res = await _client.put('/api/v1/business-hours/${item.weekday}', body: jsonEncode(item.toJson()));
+    // ApiClient.put は内部で jsonEncode するため、Map を渡す
+    final res = await _client.put('/api/v1/business-hours/${item.weekday}', body: item.toJson());
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw Exception('PUT /business-hours/${item.weekday} failed: ${res.statusCode} ${res.body}');
     }

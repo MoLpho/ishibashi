@@ -33,6 +33,11 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   void initState() {
     super.initState();
     _api = SettingsApi(ApiClient());
+    // 先にデフォルト営業時間を入れておく（API失敗時でもUIが壊れないように）
+    for (int d = 0; d < 7; d++) {
+      _open.putIfAbsent(d, () => const TimeOfDay(hour: 9, minute: 0));
+      _close.putIfAbsent(d, () => const TimeOfDay(hour: 18, minute: 0));
+    }
     _load();
   }
 
@@ -78,7 +83,9 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:00';
 
   Future<void> _pick(int weekday, bool isOpen) async {
-    final init = isOpen ? _open[weekday]! : _close[weekday]!;
+    final init = isOpen
+        ? (_open[weekday] ?? const TimeOfDay(hour: 9, minute: 0))
+        : (_close[weekday] ?? const TimeOfDay(hour: 18, minute: 0));
     final picked = await showTimePicker(
       context: context,
       initialTime: init,
@@ -170,58 +177,67 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           title: const Text('臨時休業日の設定'),
           content: SizedBox(
             width: modalWidth,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TableCalendar(
-                  firstDay: DateTime.utc(2020, 1, 1),
-                  lastDay: DateTime.utc(2100, 12, 31),
-                  focusedDay: _focused,
-                  selectedDayPredicate: (d) => isSameDay(d, selectedDay),
-                  onDaySelected: (sel, foc) {
-                    setStateDialog(() {
-                      selectedDay = sel;
-                      _focused = foc;
-                    });
-                  },
-                  onPageChanged: (foc) async {
-                    _focused = foc;
-                    await loadMonth();
-                    setStateDialog(() {});
-                  },
-                  calendarFormat: CalendarFormat.month,
-                  headerStyle: const HeaderStyle(formatButtonVisible: false),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 8,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                // 高さを画面の80%以内に抑えてスクロール可能にする
+                maxHeight: MediaQuery.of(context).size.height * 0.8,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    FilledButton(
-                      onPressed: () => addHoliday(selectedDay),
-                      child: const Text('この日を臨時休業に追加'),
+                    TableCalendar(
+                      firstDay: DateTime.utc(2020, 1, 1),
+                      lastDay: DateTime.utc(2100, 12, 31),
+                      focusedDay: _focused,
+                      selectedDayPredicate: (d) => isSameDay(d, selectedDay),
+                      onDaySelected: (sel, foc) {
+                        setStateDialog(() {
+                          selectedDay = sel;
+                          _focused = foc;
+                        });
+                      },
+                      onPageChanged: (foc) async {
+                        _focused = foc;
+                        await loadMonth();
+                        setStateDialog(() {});
+                      },
+                      calendarFormat: CalendarFormat.month,
+                      headerStyle: const HeaderStyle(formatButtonVisible: false),
                     ),
-                    const Text('（既存一覧から削除も可能）'),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton(
+                          onPressed: () => addHoliday(selectedDay),
+                          child: const Text('この日を臨時休業に追加'),
+                        ),
+                        const Text('（既存一覧から削除も可能）'),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 180,
+                      child: ListView(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: _monthHolidays
+                            .map((h) => ListTile(
+                                  leading: const Icon(Icons.event_busy),
+                                  title: Text('${h.date.year}/${h.date.month}/${h.date.day}'),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.delete_outline),
+                                    onPressed: () => deleteHoliday(h.id),
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 180,
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: _monthHolidays
-                        .map((h) => ListTile(
-                              leading: const Icon(Icons.event_busy),
-                              title: Text('${h.date.year}/${h.date.month}/${h.date.day}'),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.delete_outline),
-                                onPressed: () => deleteHoliday(h.id),
-                              ),
-                            ))
-                        .toList(),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
           actions: [
@@ -290,6 +306,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     const weekdays = ['月', '火', '水', '木', '金', '土', '日'];
     return Column(
       children: List.generate(7, (i) {
+        final open = _open[i] ?? const TimeOfDay(hour: 9, minute: 0);
+        final close = _close[i] ?? const TimeOfDay(hour: 18, minute: 0);
         return Card(
           child: ListTile(
             title: Text('曜日: ${weekdays[i]}'),
@@ -299,11 +317,11 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               children: [
                 OutlinedButton(
                   onPressed: () => _pick(i, true),
-                  child: Text('開始 ${_open[i]!.format(context)}'),
+                  child: Text('開始 ${open.format(context)}'),
                 ),
                 OutlinedButton(
                   onPressed: () => _pick(i, false),
-                  child: Text('終了 ${_close[i]!.format(context)}'),
+                  child: Text('終了 ${close.format(context)}'),
                 ),
               ],
             ),
