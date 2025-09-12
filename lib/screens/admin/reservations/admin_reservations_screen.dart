@@ -289,7 +289,7 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
       lastDay: DateTime.utc(2035, 12, 31),
       focusedDay: _focusedDay,
       locale: 'ja_JP',
-      startingDayOfWeek: StartingDayOfWeek.monday,
+      startingDayOfWeek: StartingDayOfWeek.sunday, // 日曜始まり
       calendarFormat: CalendarFormat.month,
       // 縦方向の見やすさを上げるためにセルの高さを拡大
       rowHeight: 56,
