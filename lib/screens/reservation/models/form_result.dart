@@ -7,6 +7,7 @@ class FormResult {
   final String name; // 代表者名
   final String phone; // 電話番号
   final String note;  // 備考(空文字可)
+  final int numPeople; // 代表者を含む人数
 
   const FormResult({
     required this.date,
@@ -14,5 +15,6 @@ class FormResult {
     required this.name,
     required this.phone,
     required this.note,
+    required this.numPeople,
   });
 }
