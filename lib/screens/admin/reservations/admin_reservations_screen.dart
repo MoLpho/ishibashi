@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../../../utils/validators.dart';
 import 'data/admin_reservation_repository.dart';
 import 'data/reservation.dart';
 import 'widgets/month_reservation_list.dart';
@@ -63,6 +65,8 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
 
   Future<void> _openEditModal(AdminReservation r) async {
     final nameCtrl = TextEditingController(text: r.customerName);
+    final numPeopleCtrl = TextEditingController(text: r.numPeople.toString());
+    final noteCtrl = TextEditingController(text: r.note ?? '');
     TimeOfDay st = TimeOfDay(hour: r.start.hour, minute: r.start.minute);
     TimeOfDay en = TimeOfDay(hour: r.end.hour, minute: r.end.minute);
     ReservationStatus status = r.status;
@@ -95,6 +99,8 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
                       start: DateTime(r.start.year, r.start.month, r.start.day, st.hour, st.minute),
                       end: DateTime(r.end.year, r.end.month, r.end.day, en.hour, en.minute),
                       status: status,
+                      numPeople: int.tryParse(numPeopleCtrl.text) ?? 1,
+                      note: noteCtrl.text.trim().isNotEmpty ? noteCtrl.text.trim() : null,
                     );
                     try {
                       await _repo.update(updated);
@@ -141,6 +147,20 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: numPeopleCtrl,
+                  decoration: const InputDecoration(labelText: '人数'),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  validator: (v) => Validators.intInRange(v, min: 1, max: 20),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: noteCtrl,
+                  decoration: const InputDecoration(labelText: '備考'),
+                  maxLines: 2,
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<ReservationStatus>(
@@ -289,7 +309,7 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
       lastDay: DateTime.utc(2035, 12, 31),
       focusedDay: _focusedDay,
       locale: 'ja_JP',
-      startingDayOfWeek: StartingDayOfWeek.monday,
+      startingDayOfWeek: StartingDayOfWeek.sunday, // 日曜始まり
       calendarFormat: CalendarFormat.month,
       // 縦方向の見やすさを上げるためにセルの高さを拡大
       rowHeight: 56,
@@ -352,8 +372,28 @@ class _AdminReservationsScreenState extends State<AdminReservationsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Card(
                 child: ListTile(
-                  title: Text(r.customerName),
-                  subtitle: Text(r.timeRange),
+                  title: Text(r.customerName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(r.timeRange),
+                      const SizedBox(height: 4),
+                      Text('人数: ${r.numPeople}名', style: Theme.of(context).textTheme.bodySmall),
+                      if (r.note?.isNotEmpty == true) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          '備考: ${r.note}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontStyle: FontStyle.italic,
+                            color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.8),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                  isThreeLine: r.note?.isNotEmpty == true,
                   trailing: FilledButton.tonal(
                     onPressed: () => _openEditModal(r),
                     child: const Text('編集'),

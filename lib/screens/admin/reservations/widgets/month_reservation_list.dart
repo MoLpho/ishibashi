@@ -58,8 +58,41 @@ class MonthReservationList extends StatelessWidget {
                       }
                       return ListTile(
                         dense: true, // 行の高さを詰める
-                        title: Text(r.customerName, maxLines: 1, overflow: TextOverflow.ellipsis), // 氏名
-                        subtitle: Text('${df.format(r.start)}  ${r.timeRange}'), // 日付 + 時間帯
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(r.customerName, 
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              maxLines: 1, 
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${df.format(r.start)}  ${r.timeRange}',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '人数: ${r.numPeople}名',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.8),
+                              ),
+                            ),
+                            if (r.note != null && r.note!.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                '備考: ${r.note}',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
+                        ),
+                        isThreeLine: false, // 常に3行表示にしないように修正
                         trailing: Container(
                           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                           decoration: BoxDecoration(

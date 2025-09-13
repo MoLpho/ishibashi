@@ -38,6 +38,8 @@ class AdminReservationRepository {
             int.parse(e.endTime.substring(3, 5)),
           ),
           status: _mapStatus(e.status),
+          numPeople: e.numPeople,
+          note: e.notes,
         )
     ];
   }
@@ -70,6 +72,9 @@ class AdminReservationRepository {
         ReservationStatus.cancelled => 'cancelled',
         ReservationStatus.confirmed => 'confirmed',
       },
+      notes: r.note,
+      numAdults: r.numPeople, // 仮に全員を大人として扱う。必要に応じて調整
+      numChildren: 0, // 子供の人数は0として扱う。必要に応じて調整
     );
   }
 

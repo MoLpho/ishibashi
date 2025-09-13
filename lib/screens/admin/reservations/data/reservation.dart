@@ -15,6 +15,10 @@ class AdminReservation {
   final DateTime end;
   /// 予約の現在ステータス
   final ReservationStatus status;
+  /// 予約人数
+  final int numPeople;
+  /// 備考
+  final String? note;
 
   const AdminReservation({
     required this.id,
@@ -22,6 +26,8 @@ class AdminReservation {
     required this.start,
     required this.end,
     required this.status,
+    this.numPeople = 1,
+    this.note,
   });
 
   /// 日付部分だけを抽出（時刻は切り捨て）
